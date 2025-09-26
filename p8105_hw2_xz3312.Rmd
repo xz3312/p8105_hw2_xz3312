@@ -16,6 +16,18 @@ Let's import the dataset
 pols_month_df = 
   read.csv("fivethirtyeight_datasets/pols-month.csv", na=c("NA",".",""))
 
+library(dplyr)
+library(tidyr)
+
+pols_month_clean_df = 
+  read.csv("fivethirtyeight_datasets/pols-month.csv", na=c("NA",".","")) %>% 
+  as_tibble() %>% 
+  separate(mon, into = c("year", "month", "day"), sep = "-", convert = TRUE) %>% 
+  mutate(
+    month = factor(month.name[month], levels = month.name),
+    president = if_else(prez_gop == 1, "gop", "dem")
+  ) %>% 
+  select(-prez_dem, -prez_gop, -day)
 
 ```
 
