@@ -11,7 +11,7 @@ library(readxl)
 library(haven)
 ```
 #Problem 1
-Let's import the dataset
+##Let's import the dataset pols_month and make changes to it
 ```{r}
 pols_month_df = 
   read.csv("fivethirtyeight_datasets/pols-month.csv", na=c("NA",".",""))
@@ -27,7 +27,24 @@ pols_month_clean_df =
     month = factor(month.name[month], levels = month.name),
     president = if_else(prez_gop == 1, "gop", "dem")
   ) %>% 
-  select(-prez_dem, -prez_gop, -day)
-
+  select(-prez_dem, -prez_gop)
 ```
 
+##Let's import the dataset snp.csv and make similar changes to it
+```{r}
+snp_df =
+  read.csv("fivethirtyeight_datasets/snp.csv", na=c("NA",".",""))
+
+library(dplyr)
+library(tidyr)
+
+snp_clean_df =
+    read.csv("fivethirtyeight_datasets/snp.csv", na=c("NA",".","")) %>%
+  as_tibble() %>% 
+  separate(date, into = c("month","day","year"), sep = "/", convert = TRUE) %>% 
+  mutate(
+    month = factor(month.name[month], levels = month.name)
+  ) %>% 
+  relocate(year, month, day)
+      
+```
