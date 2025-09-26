@@ -1,0 +1,21 @@
+---
+title: "p8105_hw2_xz3312"
+author: "Eric Zhang"
+date: "2025-09-26"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(haven)
+```
+#Problem 1
+Let's import the dataset
+```{r}
+pols_month_df = 
+  read.csv("fivethirtyeight_datasets/pols-month.csv", na=c("NA",".",""))
+
+
+```
+
