@@ -43,8 +43,16 @@ snp_clean_df =
   as_tibble() %>% 
   separate(date, into = c("month","day","year"), sep = "/", convert = TRUE) %>% 
   mutate(
+    year = year + if_else(year>=50L, 1900L,2000L),
     month = factor(month.name[month], levels = month.name)
   ) %>% 
   relocate(year, month, day)
       
 ```
+
+##Let's import and tidy the unemployment dataset so it can be merged with previous datasets
+```{r}
+unemployment_df =
+   read.csv("fivethirtyeight_datasets/unemployment.csv", na=c("NA",".",""))
+```
+
