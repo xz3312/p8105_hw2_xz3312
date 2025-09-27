@@ -109,6 +109,7 @@ mrtrashwheel_clean_df <- trashwheel_df %>%
     sports_balls = as.integer(round(sports_balls))
   )
 
+
 mrtrashwheel_clean_df %>% 
   select(-x15,-x16)
 
@@ -125,12 +126,15 @@ prof_trashwheel_df <- read_excel(
   na    = c("", "NA", "."),
 ) 
 
-proftrashwheel_clean_df <- prof_trashwheel_df %>% 
+
+proftrashwheel_clean_df <- prof_trashwheel_df %>%
   mutate(
-    `Homes Powered*` = as.integer(round(`Homes Powered*`)) #rounded home powered to integer
+    `Homes Powered*` = as.integer(round(`Homes Powered*`)) 
   )
 
 proftrashwheel_clean_df <- proftrashwheel_clean_df[-c(119, 120, 121), ] #I noticed row 119 to 121 had mostly NA values, so I removed them
+
+gwynndatrashwheel_clean_df = gwynnda_trashwheel_df %>% clean_names()
 
 gwynnda_trashwheel_df <- read_excel(
   path  = "~/Desktop/p8105_homework_2/202409_trashwheel.xlsx",
@@ -144,6 +148,11 @@ gwynndatrashwheel_clean_df <- gwynnda_trashwheel_df %>%
     `Homes Powered*` = as.integer(round(`Homes Powered*`)) #rounded home powered to integer
   )
 
+
 gwynndatrashwheel_clean_df <- gwynndatrashwheel_clean_df[-c(264), ] #removed row 264 which is NA
-  
+
+proftrashwheel_clean_df   <- proftrashwheel_clean_df   %>% clean_names()
+gwynndatrashwheel_clean_df <- gwynndatrashwheel_clean_df %>% clean_names() #make column names all non-capitalized in order to combine them
+
+
 ```
