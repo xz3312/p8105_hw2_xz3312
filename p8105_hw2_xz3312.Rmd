@@ -96,21 +96,40 @@ library(readxl)
 library(dplyr)
 library(janitor)
 library(lubridate)
-trashwheel_df = 
+mrtrashwheel_df = 
   read_excel("~/Desktop/p8105_homework_2/202409_trashwheel.xlsx", na=c("NA",".",""))
 
 
-trashwheel_df <- trashwheel_df |> clean_names()
+mrtrashwheel_df <- trashwheel_df %>%  clean_names()
 
-trashwheel_clean_df <- trashwheel_df |>
-  filter(!is.na(dumpster)) |>
+mrtrashwheel_clean_df <- trashwheel_df %>% 
+  filter(!is.na(dumpster)) %>% 
   mutate(
     date = as.Date(as.character(date)),
     sports_balls = as.integer(round(sports_balls))
   )
 
-trashwheel_clean_df %>% 
+mrtrashwheel_clean_df %>% 
   select(-x15,-x16)
 
 ```
+##Do the same for professor trashwheel and gwynnda trashwheel data
+```{r}
+library(readxl)
+library(dplyr)
+library(janitor)
+prof_trashwheel_df <- read_excel(
+  path  = "~/Desktop/p8105_homework_2/202409_trashwheel.xlsx",
+  sheet = "Professor Trash Wheel",   
+  skip  = 1,                         
+  na    = c("", "NA", "."),
+) 
 
+proftrashwheel_clean_df <- prof_trashwheel_df %>% 
+  mutate(
+    `Homes Powered*` = as.integer(round(`Homes Powered*`)) #rounded home powered to integer
+  )
+
+proftrashwheel_clean_df <- proftrashwheel_clean_df[-c(119, 120, 121), ] #I noticed row 119 to 121 had mostly NA values, so I removed them
+  
+```
