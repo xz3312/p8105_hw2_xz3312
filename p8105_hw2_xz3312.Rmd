@@ -165,5 +165,24 @@ num_cols <- c(
 )
 
 
+coerce_types <- function(df) {
+  df %>%
+    mutate(
+      year  = as.integer(year),
+      month = as.character(month),
+      date  = as.Date(date)
+    ) %>%
+    mutate(across(any_of(num_cols), as.numeric))
+}
+
+trashwheel_all <- list(
+  mrtrashwheel_clean_df   %>% mutate(wheel = "Mr"),
+  proftrashwheel_clean_df %>% mutate(wheel = "Professor"),
+  gwynndatrashwheel_clean_df %>% mutate(wheel = "Gwynnda")
+) %>%
+  map(coerce_types) %>%
+  bind_rows() %>%
+  select(wheel, everything())
+
 
 ```
