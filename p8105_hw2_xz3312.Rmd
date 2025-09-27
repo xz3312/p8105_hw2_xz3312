@@ -11,7 +11,7 @@ library(readxl)
 library(haven)
 ```
 #Problem 1
-##Let's import the dataset pols_month and make changes to it
+##Let's import the dataset pols_month and make changes to it [problem 1 part 1]
 ```{r}
 pols_month_df = 
   read.csv("fivethirtyeight_datasets/pols-month.csv", na=c("NA",".",""))
@@ -30,7 +30,7 @@ pols_month_clean_df =
   select(-prez_dem, -prez_gop)
 ```
 
-##Let's import the dataset snp.csv and make similar changes to it
+##Let's import the dataset snp.csv and make similar changes to it [problem 1 part 2]
 ```{r}
 snp_df =
   read.csv("fivethirtyeight_datasets/snp.csv", na=c("NA",".",""))
@@ -50,9 +50,37 @@ snp_clean_df =
       
 ```
 
-##Let's import and tidy the unemployment dataset so it can be merged with previous datasets
+##Let's import and tidy the unemployment dataset so it can be merged with previous datasets [problem 1 part 3]
 ```{r}
 unemployment_df =
    read.csv("fivethirtyeight_datasets/unemployment.csv", na=c("NA",".",""))
+
+library(dplyr)
+library(tidyr)
+library(janitor)
+library(stringr)
+
+unemployment_clean_df <-
+  read.csv("fivethirtyeight_datasets/unemployment.csv",
+           na = c("NA", ".", "")) %>%
+  as_tibble() %>%
+  clean_names() %>%
+  pivot_longer(
+    cols = jan:dec,              # after clean_names(): jan, feb, ..., dec
+    names_to = "month",
+    values_to = "unemployment_percentage"
+  ) %>%
+  mutate(
+    month = factor(
+      str_to_title(month),       # "jan" -> "Jan"
+      levels = month.abb,        # "Jan","Feb",...,"Dec"
+      ordered = TRUE
+    )
+  ) %>%
+  arrange(year, month)
+
+merge_df = pols_month_clean_df %>% 
+  left_join(snp_clean_df, by = c("year", "month"))
+  
 ```
 
