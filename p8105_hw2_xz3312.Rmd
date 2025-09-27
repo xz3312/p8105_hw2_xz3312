@@ -154,5 +154,16 @@ gwynndatrashwheel_clean_df <- gwynndatrashwheel_clean_df[-c(264), ] #removed row
 proftrashwheel_clean_df   <- proftrashwheel_clean_df   %>% clean_names()
 gwynndatrashwheel_clean_df <- gwynndatrashwheel_clean_df %>% clean_names() #make column names all non-capitalized in order to combine them
 
+library(dplyr)
+library(purrr)
+
+
+num_cols <- c(
+  "weight_tons","volume_cubic_yards","plastic_bottles","polystyrene",
+  "cigarette_butts","glass_bottles","plastic_bags","wrappers",
+  "sports_balls","homes_powered"
+)
+
+
 
 ```
