@@ -79,8 +79,15 @@ unemployment_clean_df <-
   ) %>%
   arrange(year, month)
 
-merge_df = pols_month_clean_df %>% 
-  left_join(snp_clean_df, by = c("year", "month"))
-  
-```
+pols2  <- pols_month_clean_df  %>% mutate(month = str_to_title(as.character(month)))
+snp2   <- snp_clean_df         %>% mutate(month = str_to_title(as.character(month)))
+unemp2 <- unemployment_clean_df %>% mutate(month = str_to_title(as.character(month)))
 
+merged_df <- pols2 %>%
+  left_join(snp2,  by = c("year", "month")) %>%
+  left_join(unemp2, by = c("year", "month"))
+
+```
+The pols dataset gives information about the composition of the U.S. executive and legislative branches by month and year, and which party holds the office. Snp dataset contains monthly closing values of the stocks, which connects politics to market performance. Unemployment dataset gives unemployment percentage by month and year. I wish the unemployment dataset provided day of the month as well, even if percentage number is consistent; this would make the dataframe have less NA values.
+
+#Problem 2
