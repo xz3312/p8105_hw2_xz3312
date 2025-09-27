@@ -91,3 +91,26 @@ merged_df <- pols2 %>%
 The pols dataset gives information about the composition of the U.S. executive and legislative branches by month and year, and which party holds the office. Snp dataset contains monthly closing values of the stocks, which connects politics to market performance. Unemployment dataset gives unemployment percentage by month and year. I wish the unemployment dataset provided day of the month as well, even if percentage number is consistent; this would make the dataframe have less NA values.
 
 #Problem 2
+```{r}
+library(readxl)
+library(dplyr)
+library(janitor)
+library(lubridate)
+trashwheel_df = 
+  read_excel("~/Desktop/p8105_homework_2/202409_trashwheel.xlsx", na=c("NA",".",""))
+
+
+trashwheel_df <- trashwheel_df |> clean_names()
+
+trashwheel_clean_df <- trashwheel_df |>
+  filter(!is.na(dumpster)) |>
+  mutate(
+    date = as.Date(as.character(date)),
+    sports_balls = as.integer(round(sports_balls))
+  )
+
+trashwheel_clean_df %>% 
+  select(-x15,-x16)
+
+```
+
