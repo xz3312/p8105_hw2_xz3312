@@ -88,7 +88,8 @@ merged_df <- pols2 %>%
   left_join(unemp2, by = c("year", "month"))
 
 ```
-The pols dataset gives information about the composition of the U.S. executive and legislative branches by month and year, and which party holds the office. Snp dataset contains monthly closing values of the stocks, which connects politics to market performance. Unemployment dataset gives unemployment percentage by month and year. I wish the unemployment dataset provided day of the month as well, even if percentage number is consistent; this would make the dataframe have less NA values.
+The `pols_month_clean_df` dataset gives information about the composition of the U.S. executive and legislative branches by month and year, and which party holds the office. The `snp_clean_df` dataset contains monthly closing values of the stock market, connecting politics to market performance. The `unemployment_clean_df` dataset reports unemployment percentages by month and year and contains `r nrow(unemployment_clean_df)` total monthly observations. After cleaning, these three datasets were merged to create a single data frame `merged_df` with `r nrow(merged_df)` rows and `r ncol(merged_df)` columns. The merged data set covers `r min(merged_df$year)` and includes variables such as `year`, `month`, `president`, `close`, and `unemployment_percentage`. I wish the unemployment dataset provided day of month information, this extra detail would reduce the number of `NA` values in the dataset.
+
 
 #Problem 2
 ```{r}
@@ -197,7 +198,8 @@ trashwheel_all %>%
 
 ```
 
-The combined trashwheel_all dataset contains 1032 observations of 17 variables from three datasets, each representing one dumpster’s collection event from Mr. Trash Wheel, Professor Trash Wheel, or Gwynnda. Important variables include date (the collection date), weight_tons (tons of trash removed), and specific counts such as cigarette butts, plastic bottles, and sports balls. The total weight in tons collected by professor is 246.76, and the total cigarette butts collected by Gwynnda in June 2022 is 18120.
+The combined `trashwheel_all` dataset contains `r nrow(trashwheel_all)` observations of `r ncol(trashwheel_all)` variables from three datasets, each representing one dumpster’s collection event from Mr. Trash Wheel, Professor Trash Wheel, or Gwynnda. Important variables include `date` (the collection date), `weight_tons` (tons of trash removed), and specific counts such as `cigarette_butts`, `plastic_bottles`, and `sports_balls`. The total weight in tons collected by Professor Trash Wheel is `r trashwheel_all %>% filter(wheel == "Professor") %>% summarise(sum(weight_tons, na.rm = TRUE)) %>% pull()`, and the total number of cigarette butts collected by Gwynnda in June 2022 is `r trashwheel_all %>% filter(wheel == "Gwynnda", year == 2022, month == "June") %>% summarise(sum(cigarette_butts, na.rm = TRUE)) %>% pull()`.
+
 
 
 #Problem 3
@@ -309,3 +311,4 @@ largest10_drop
 
 ```
 
+After importing and cleaning both files, I created a single tidy dataset (`joint_data`) with `r n_obs` monthly observations across `r n_zip_unique` unique ZIP codes and `r n_nbhd` unique neighborhoods. Key variables are `zip_code`, `date`, and `price` (ZORI), with location metadata such as `borough`, `county`, and `neighborhood`. ZIP codes in the ZIP file but not in the Zillow rental dataset (`zips_missing`) are likely non-residential zip codes, so Zillow did not publish an index. Comparing January 2020 to January 2021, the table `largest10_drop` shows the 10 ZIP codes with the largest rent declines, along with their borough and neighborhood.
