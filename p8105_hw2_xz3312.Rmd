@@ -202,6 +202,110 @@ The combined trashwheel_all dataset contains 1032 observations of 17 variables f
 
 #Problem 3
 ```{r}
+## Problem 3 ----
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(lubridate)
+library(janitor)
+
+
+zip <-
+  read_csv("zillow_data/Zip Codes.csv", na = "NA") %>% 
+  clean_names()
+
+
+price <-
+  read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = "NA") %>% 
+  clean_names() %>% 
+  mutate(county_name = str_remove(county_name, " County$")) %>% 
+  rename_with(~ str_remove(.x, "^x"), .cols = "x2015_01_31":"x2024_08_31") %>% 
+  rename(
+    zip_code = region_name,
+    county   = county_name
+  ) %>% 
+
+  drop_na(`2015_01_31`:`2024_08_31`) %>% 
+  select(-region_type, -state_name)
+
+joint_data <-
+  right_join(zip, price, by = c("zip_code", "county")) %>% 
+  pivot_longer(
+    `2015_01_31`:`2024_08_31`,
+    names_to  = "date",
+    values_to = "price"
+  ) %>% 
+  mutate(
+    date = lubridate::ymd(date),
+    borough = dplyr::recode(
+      county,
+      "Bronx"    = "Bronx",
+      "Kings"    = "Brooklyn",
+      "New York" = "Manhattan",
+      "Queens"   = "Queens",
+      "Richmond" = "Staten Island",
+      .default   = NA_character_
+    )
+  ) %>% 
+  select(
+    state, city, county, borough, state_fips, county_fips, county_code,
+    metro, neighborhood, zip_code, region_id, size_rank, date, price, file_date
+  ) %>% 
+  arrange(zip_code, date)
+
+
+n_obs        <- nrow(joint_data)
+n_zip_unique <- n_distinct(joint_data$zip_code)
+n_nbhd       <- n_distinct(joint_data$neighborhood)
+
+n_obs; n_zip_unique; n_nbhd
+
+zips_missing <-
+  zip %>% 
+  filter(!zip_code %in% price$zip_code) %>% 
+  arrange(county, neighborhood, zip_code)
+
+head(zips_missing, 10)
+
+library(dplyr)
+library(lubridate)
+
+
+jan_2020 <- joint_data %>%
+  filter(date == ymd("2020-01-31")) %>%
+  select(zip_code, price_2020 = price)
+
+jan_2021 <- joint_data %>%
+  filter(date == ymd("2021-01-31")) %>%
+  select(zip_code, price_2021 = price)
+
+largest10_drop <-
+  jan_2020 %>%
+  inner_join(jan_2021, by = "zip_code") %>%
+  mutate(
+    change     = price_2021 - price_2020,
+    pct_change = 100 * change / price_2020
+  ) %>%
+
+  left_join(zip %>% select(zip_code, neighborhood, county), by = "zip_code") %>%
+  mutate(
+    borough = dplyr::recode(
+      county,
+      "Bronx"    = "Bronx",
+      "Kings"    = "Brooklyn",
+      "New York" = "Manhattan",
+      "Queens"   = "Queens",
+      "Richmond" = "Staten Island",
+      .default   = NA_character_
+    )
+  ) %>%
+  arrange(change) %>%
+  slice_head(n = 10) %>%
+  select(zip_code, borough, neighborhood, county,
+         price_2020, price_2021, change, pct_change)
+
+largest10_drop
 
 ```
 
