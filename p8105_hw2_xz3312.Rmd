@@ -202,7 +202,8 @@ The combined `trashwheel_all` dataset contains `r nrow(trashwheel_all)` observat
 
 
 
-#Problem 3
+#Problem 3 with updated dataset
+
 ```{r}
 ## Problem 3 ----
 library(readr)
@@ -214,32 +215,35 @@ library(janitor)
 
 
 zip <-
-  read_csv("zillow_data/Zip Codes.csv", na = "NA") %>% 
+  read_csv("zillow_data/Zip Codes.csv", na = c("NA", "")) %>%
   clean_names()
 
+price_raw <-
+  read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = c("NA", "")) %>%
+  clean_names()
+
+date_cols <- names(price_raw)[grepl("^x?\\d{4}_\\d{2}_\\d{2}$", names(price_raw))]
 
 price <-
-  read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = "NA") %>% 
-  clean_names() %>% 
-  mutate(county_name = str_remove(county_name, " County$")) %>% 
-  rename_with(~ str_remove(.x, "^x"), .cols = "x2015_01_31":"x2024_08_31") %>% 
+  price_raw %>%
+  mutate(county_name = str_remove(county_name, " County$")) %>%
+  rename_with(~ str_remove(.x, "^x"), .cols = all_of(date_cols)) %>%
   rename(
     zip_code = region_name,
     county   = county_name
-  ) %>% 
-
-  drop_na(`2015_01_31`:`2024_08_31`) %>% 
-  select(-region_type, -state_name)
+  ) %>%
+  drop_na(all_of(str_remove(date_cols, "^x"))) %>%
+  select(-any_of(c("region_type", "state_name")))
 
 joint_data <-
-  right_join(zip, price, by = c("zip_code", "county")) %>% 
+  right_join(zip, price, by = c("zip_code", "county")) %>%
   pivot_longer(
-    `2015_01_31`:`2024_08_31`,
+    cols = matches("^\\d{4}_\\d{2}_\\d{2}$"),
     names_to  = "date",
     values_to = "price"
-  ) %>% 
+  ) %>%
   mutate(
-    date = lubridate::ymd(date),
+    date = ymd(date),
     borough = dplyr::recode(
       county,
       "Bronx"    = "Bronx",
@@ -249,11 +253,11 @@ joint_data <-
       "Richmond" = "Staten Island",
       .default   = NA_character_
     )
-  ) %>% 
+  ) %>%
   select(
     state, city, county, borough, state_fips, county_fips, county_code,
     metro, neighborhood, zip_code, region_id, size_rank, date, price, file_date
-  ) %>% 
+  ) %>%
   arrange(zip_code, date)
 
 
@@ -263,16 +267,13 @@ n_nbhd       <- n_distinct(joint_data$neighborhood)
 
 n_obs; n_zip_unique; n_nbhd
 
+
 zips_missing <-
-  zip %>% 
-  filter(!zip_code %in% price$zip_code) %>% 
+  zip %>%
+  filter(!zip_code %in% price$zip_code) %>%
   arrange(county, neighborhood, zip_code)
 
 head(zips_missing, 10)
-
-library(dplyr)
-library(lubridate)
-
 
 jan_2020 <- joint_data %>%
   filter(date == ymd("2020-01-31")) %>%
@@ -289,8 +290,10 @@ largest10_drop <-
     change     = price_2021 - price_2020,
     pct_change = 100 * change / price_2020
   ) %>%
-
-  left_join(zip %>% select(zip_code, neighborhood, county), by = "zip_code") %>%
+  left_join(
+    zip %>% select(zip_code, neighborhood, county),
+    by = "zip_code"
+  ) %>%
   mutate(
     borough = dplyr::recode(
       county,
@@ -310,5 +313,4 @@ largest10_drop <-
 largest10_drop
 
 ```
-
-After importing and cleaning both files, I created a single tidy dataset (`joint_data`) with `r n_obs` monthly observations across `r n_zip_unique` unique ZIP codes and `r n_nbhd` unique neighborhoods. Key variables are `zip_code`, `date`, and `price` (ZORI), with location metadata such as `borough`, `county`, and `neighborhood`. ZIP codes in the ZIP file but not in the Zillow rental dataset (`zips_missing`) are likely non-residential zip codes, so Zillow did not publish an index. Comparing January 2020 to January 2021, the table `largest10_drop` shows the 10 ZIP codes with the largest rent declines, along with their borough and neighborhood.
+After importing and cleaning the updated files, I created a single tidy dataset (joint_data) spanning r format(min(joint_data$date), "%Y-%m")–r format(max(joint_data$date), "%Y-%m"), with r n_obs monthly observations across r n_zip_unique unique ZIP codes and r n_nbhd neighborhoods. Key variables are zip_code, date, and price (ZORI), along with location metadata such as borough, county, and neighborhood. ZIP codes found in the crosswalk but missing from the Zillow rental dataset (zips_missing) are likely non-residential or suppressed ZIPs. Comparing January 2020 to January 2021, the table largest10_drop reports the 10 ZIP codes with the largest rent declines, with their borough and neighborhood.
